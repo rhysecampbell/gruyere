@@ -26,6 +26,7 @@ resource "aws_security_group_rule" "ssh" {
   cidr_blocks     = ["0.0.0.0/0"]
   security_group_id = aws_security_group.instances.id
 }
+
 resource "aws_security_group_rule" "outbound_allow_all" {
   type            = "egress"
   from_port       = 0
@@ -44,15 +45,6 @@ resource "aws_security_group_rule" "inbound_allow_all" {
   security_group_id = aws_security_group.instances.id
 }
 
-resource "aws_security_group_rule" "kubeapi" {
-  type            = "ingress"
-  from_port       = 0
-  to_port         = 65535
-  protocol        = "TCP"
-  self            = true  
-  security_group_id = aws_security_group.instances.id
-
-}
 
 data "aws_ami" "ubuntu" {
   most_recent = true
@@ -82,7 +74,7 @@ resource "aws_instance" "server" {
   key_name = "deployer-key"
   vpc_security_group_ids = ["${aws_security_group.instances.id}"]
   tags = {
-    Name = "${var.resource_prefix}-k3s-server"
+    Name = "${var.resource_prefix}-server"
   }
   provisioner "local-exec" {
     command = "echo ${aws_instance.server.public_ip} > server-ip.txt"

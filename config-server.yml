@@ -1,4 +1,43 @@
 #cloud-config
+
+package_update: true
+package_upgrade: true
+packages:
+ - wget
+ - siege
+ - default-jdk
+ - nmap
+ - python-minimal # 2.7
+
+# Install vulnerable web apps
 runcmd:
-- curl -sfL https://get.k3s.io | sh -
+ - [ ls, -l, / ]
+ - [ sh, -xc, "echo $(date) ': hello world!'" ]
+ - [ sh, -c, echo "=========hello world'=========" ]
+ - ls -l /root
+ # Note: Don't write files to /tmp from cloud-init use /run/somedir instead.
+ # Early boot environments can race systemd-tmpfiles-clean LP: #1707222.
+ - [ sh, -c, echo "=========> Pulling WebGoat..." ]
+ - mkdir /home/ubuntu/webgoat
+ - [ wget, "https://github.com/WebGoat/WebGoat/releases/download/v8.1.0/webgoat-server-8.1.0.jar", -O, /home/ubuntu/webgoat/webgoat.jar ]
+ - [ sh, -c, echo "=========> Pulling WebWolf..." ]
+ - [ wget, "https://github.com/WebGoat/WebGoat/releases/download/v8.1.0/webwolf-8.1.0.jar", -O, /home/ubuntu/webgoat/webwolf.jar ]
+ - [ sh, -c, echo "=========> Pulling Gruyere..." ]
+ - mkdir /home/ubuntu/gruyere
+ - git clone https://github.com/rhysecampbell/gruyere /home/ubuntu/gruyere
+
+
+# Write files - requires b64 encoding of said file
+#write_files:
+#-   encoding: b64
+#    content: Y3VybCAtc2ZMIGh0dHBzOi8vZ2V0Lmszcy5pbyB8IEszU19VUkw9aHR0cHM6Ly9leGFtcGxlLXVybDo2NDQzIEszU19UT0tFTj1YWFggc2ggLQo=
+#    owner: root:root
+#    path: /root/k3s.sh
+#    permissions: '0755'
+#-   encoding: b64
+#    content: a3ViZWN0bCBjcmVhdGUgbmFtZXNwYWNlIHJldGFpbC1wcm9qZWN0LWRldgpzbGVlcCAxCmN1cmwgLVggR0VUIC1MIGh0dHBzOi8vZ2lzdC5naXRodWJ1c2VyY29udGVudC5jb20vZnJhbnNhZnUvNDA3NWNkY2FmMjI4M2NhNTY1MGU3MWM3ZmQ4MzM1Y2IvcmF3LzE5ZDdjZmEwZjgyZjFiNjZhZjZlMzkzODkwNzNiY2IwMTA4YzQ5NGMvc2ltcGxlLXJlc3QtZ29sYW5nLnlhbWwgPiBzaW1wbGUtcmVzdC1nb2xhbmcueWFtbApzbGVlcCAxCmt1YmVjdGwgYXBwbHkgLWYgc2ltcGxlLXJlc3QtZ29sYW5nLnlhbWwKc2xlZXAgMQprdWJlY3RsIGdldCBpbmdyZXNzLHN2Yyxwb2RzIC1uIHJldGFpbC1wcm9qZWN0LWRldgoK
+#    owner: root:root
+#    path: /root/app_install.sh
+#    permissions: '0755'
+
 final_message: "The system is finally up, after $UPTIME seconds"
